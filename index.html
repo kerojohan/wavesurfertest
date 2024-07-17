@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WaveSurfer Example</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/6.6.4/wavesurfer.min.js" integrity="sha512-/OXj4FUgEscXKD5YhrFOjx2NWZ7gjGatMETWNd0z6CNyF/pPDUto2Fu3qE2qqh1kVn5or3jGogF01s1ioSts9A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/6.6.4/plugin/wavesurfer.spectrogram.min.js" integrity="sha512-wt2bvg4bCCYZtLKhOsq7JKXendpEvwEp6UPdp0xUSj7Bms3JkBecaw1i9RCC3JkVev+4PwzUkfTCEAlmBTFx9Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/6.6.4/plugin/wavesurfer.spectrogram.min.css" integrity="sha512-wt2bvg4bCCYZtLKhOsq7JKXendpEvwEp6UPdp0xUSj7Bms3JkBecaw1i9RCC3JkVev+4PwzUkfTCEAlmBTFx9Q==" crossorigin="anonymous" referrerpolicy="no-referrer">
+</head>
+<body>
+  <video
+    src="video-prova2-segments.mp4"
+    controls
+    playsinline
+    style="width: 100%; max-width: 600px; margin: 0 auto; display: block;"
+  ></video>
+
+  <div id="waveform"></div>
+  <div id="spectrogram"></div>
+  
+  <script>
+    // Inicializa Wavesurfer
+    var wavesurfer = WaveSurfer.create({
+      container: '#waveform',
+      waveColor: 'violet',
+      progressColor: 'purple',
+      backend: 'MediaElement',
+      mediaControls: true
+    });
+
+    // Carga el elemento de video
+    var videoElement = document.querySelector('video');
+    wavesurfer.load(videoElement);
+
+    // Inicializa el plugin de espectrograma correctamente
+    wavesurfer.on('ready', function() {
+      wavesurfer.initPlugin('spectrogram');
+    });
+
+    wavesurfer.addPlugin(WaveSurfer.spectrogram.create({
+      container: '#spectrogram',
+      fftSamples: 512,
+      labels: true
+    }));
+
+    // Añade la funcionalidad de clic al espectrograma
+    document.getElementById('spectrogram').addEventListener('click', function(event) {
+      var bbox = this.getBoundingClientRect();
+      var x = event.clientX - bbox.left;
+      var duration = wavesurfer.getDuration();
+      var elementWidth = wavesurfer.drawer.width / wavesurfer.params.pixelRatio;
+      var percent = x / elementWidth;
+      var seekTo = duration * percent;
+
+      wavesurfer.seekAndCenter(percent);
+      videoElement.currentTime = seekTo;
+    });
+  </script>
+</body>
+</html>
