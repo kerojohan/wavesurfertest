@@ -4,57 +4,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WaveSurfer Example</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/6.6.4/wavesurfer.min.js" integrity="sha512-/OXj4FUgEscXKD5YhrFOjx2NWZ7gjGatMETWNd0z6CNyF/pPDUto2Fu3qE2qqh1kVn5or3jGogF01s1ioSts9A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/6.6.4/plugin/wavesurfer.spectrogram.min.js" integrity="sha512-wt2bvg4bCCYZtLKhOsq7JKXendpEvwEp6UPdp0xUSj7Bms3JkBecaw1i9RCC3JkVev+4PwzUkfTCEAlmBTFx9Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/6.6.4/plugin/wavesurfer.spectrogram.min.css" integrity="sha512-wt2bvg4bCCYZtLKhOsq7JKXendpEvwEp6UPdp0xUSj7Bms3JkBecaw1i9RCC3JkVev+4PwzUkfTCEAlmBTFx9Q==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  
+  <!-- Incluye Wavesurfer.js y el plugin de espectrograma desde CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/7.8.2/wavesurfer.min.js" integrity="sha512-/w1TrbQj6MjxduJ6T2AZZILvhxWmdbWaJFT9+C4bd3hqJCPJ6fFi6wHC67zHolLyhncR4SAP+8jwKzmOjwHBhw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/7.8.2/plugins/spectrogram.min.js" integrity="sha512-+kHXpMzUAZqA/uqi7Qd393vHheKyz3bGLjAxN4tysngl4gGQt/tkBLyoiQuikqMquNoaX48XQDA30AfeXZ6xDg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
 </head>
 <body>
   <video
+    id="video"
     src="video-prova2-segments.mp4"
     controls
     playsinline
     style="width: 100%; max-width: 600px; margin: 0 auto; display: block;"
   ></video>
-
-  <div id="waveform"></div>
-  <div id="spectrogram"></div>
-  
+<div id="waveform" />
+  <div id="wave-container" />
   <script>
-    // Inicializa Wavesurfer
-    var wavesurfer = WaveSurfer.create({
-      container: '#waveform',
-      waveColor: 'violet',
-      progressColor: 'purple',
-      backend: 'MediaElement',
-      mediaControls: true
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+     const ws = WaveSurfer.create({
+  container: document.body,
+  waveColor: 'rgb(200, 0, 200)',
+  progressColor: 'rgb(100, 0, 100)',
+  // Pass the video element in the `media` param
+  media: document.querySelector('video'),
+})
 
-    // Carga el elemento de video
-    var videoElement = document.querySelector('video');
-    wavesurfer.load(videoElement);
+     // Initialize the Spectrogram plugin
+ws.registerPlugin(
+  WaveSurfer.Spectrogram.create({
+    labels: true,
+    height: 200,
+    splitChannels: true,
+  }),
+)
 
-    // Inicializa el plugin de espectrograma correctamente
-    wavesurfer.on('ready', function() {
-      wavesurfer.initPlugin('spectrogram');
-    });
-
-    wavesurfer.addPlugin(WaveSurfer.spectrogram.create({
-      container: '#spectrogram',
-      fftSamples: 512,
-      labels: true
-    }));
-
-    // Añade la funcionalidad de clic al espectrograma
-    document.getElementById('spectrogram').addEventListener('click', function(event) {
-      var bbox = this.getBoundingClientRect();
-      var x = event.clientX - bbox.left;
-      var duration = wavesurfer.getDuration();
-      var elementWidth = wavesurfer.drawer.width / wavesurfer.params.pixelRatio;
-      var percent = x / elementWidth;
-      var seekTo = duration * percent;
-
-      wavesurfer.seekAndCenter(percent);
-      videoElement.currentTime = seekTo;
+// Play on click
+ws.once('interaction', () => {
+  ws.play()
+})
     });
   </script>
 </body>
